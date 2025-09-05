@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INFIS Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Пузырьки -->
+  <div class="bubbles">
+    <div class="bubble blue" style="left:10%; width:40px; height:40px; animation-duration:18s; --start:0.3;"></div>
+    <div class="bubble pink" style="left:25%; width:25px; height:25px; animation-duration:22s; animation-delay:3s; --start:0.6;"></div>
+    <div class="bubble purple" style="left:40%; width:60px; height:60px; animation-duration:25s; animation-delay:6s; --start:0.1;"></div>
+    <div class="bubble blue" style="left:55%; width:20px; height:20px; animation-duration:20s; animation-delay:2s; --start:0.5;"></div>
+    <div class="bubble pink" style="left:70%; width:50px; height:50px; animation-duration:30s; animation-delay:4s; --start:0.2;"></div>
+    <div class="bubble purple" style="left:85%; width:35px; height:35px; animation-duration:26s; animation-delay:8s; --start:0.7;"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <a href="index.html">
+        <img src="photos/logo-infis.png" alt="infis logo" class="header-logo"/>
+      </a>
+      <ul>
+        <li><a href="general-chat.html">Общие чаты</a></li>
+        <li><a href="#">Добавить свой чат</a></li>
+        <li><a href="general-chat.html" class="login">Войти в чат</a></li>
+        <li><a href="support.html">Поддержка</a></li>
+      </ul>
+    </header>
+
+    <!-- Hero блок -->
+    <main class="hero">
+      <h1 class="hero-title">INFIS Chat</h1>
+      <p class="hero-subtitle">Платформа для общения студентов INFIS</p>
+      <a href="general-chat.html" class="btn">Перейти в чат</a>
+    </main>
+
+    <!-- Фичи -->
+    <section class="features">
+      <div class="feature-card">
+        <h3>Общий чат</h3>
+        <p>Общайся с другими студентами в реальном времени</p>
+      </div>
+      <div class="feature-card">
+        <h3>Добавь свой чат</h3>
+        <p>Создай уникальное пространство для своих друзей</p>
+      </div>
+      <div class="feature-card">
+        <h3>Поддержка</h3>
+        <p>Помощь 24/7 по вопросам платформы</p>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

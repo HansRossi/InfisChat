@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чат</title>
+<link rel="stylesheet" href="styles.css">
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a href="index.html">
+      <img src="photos/logo-infis.png" alt="logo" class="header-logo">
+    </a>
+    <ul>
+      <li><a href="general-chat.html">Назад к чатам</a></li>
+    </ul>
+  </header>
+
+  <main class="chat-room">
+    <h1 id="room-name"></h1>
+    <div class="chat-messages" id="chat-messages"></div>
+    <form id="chat-form">
+      <input type="text" id="msg" placeholder="Введите сообщение..." autocomplete="off" required />
+      <button type="submit">Отправить</button>
+    </form>
+  </main>
+</div>
+
+<script>
+const socket = io();
+let user = localStorage.getItem('user');
+if(!user){
+  user = prompt('Введите ваше имя:');
+  localStorage.setItem('user', user);
+}
+
+const params = new URLSearchParams(window.location.search);
+const room = params.get('room') || 'default';
+document.getElementById('room-name').textContent = `Чат: ${room}`;
+
+socket.emit('joinRoom', { room, user });
+
+const chatMessages = document.getElementById('chat-messages');
+socket.on('previousMessages', (messages) => {
+  messages.forEach(m => addMessage(m.user, m.text));
+});
+
+socket.on('newMessage', (m) => addMessage(m.user, m.text));
+
+function addMessage(user, text){
+  const div = document.createElement('div');
+  div.classList.add('message');
+  div.innerHTML = `<strong>${user}:</strong> ${text}`;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+document.getElementById('chat-form').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const msg = document.getElementById('msg').value;
+  socket.emit('sendMessage', { room, user, text: msg });
+  document.getElementById('msg').value = '';
+});
+</script>
+</body>
+</html>

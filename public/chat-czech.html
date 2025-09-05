@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Český chat | INFIS Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <style>
+    /* Дополнительные стили для улучшения интерфейса чата */
+    .chat-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+    
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: rgba(0, 102, 255, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .chat-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    
+    .chat-flag {
+      width: 32px;
+      height: 24px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .leave-btn, .name-btn {
+      background: linear-gradient(90deg, #ff4757, #ff3838);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
+    }
+    
+    .name-btn {
+      background: linear-gradient(90deg, #0066ff, #0099ff);
+      box-shadow: 0 4px 12px rgba(0, 102, 255, 0.4);
+    }
+    
+    .leave-btn:hover, .name-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 71, 87, 0.5);
+    }
+    
+    .name-btn:hover {
+      box-shadow: 0 6px 16px rgba(0, 102, 255, 0.5);
+    }
+    
+    .chat-content {
+      display: flex;
+      height: 70vh;
+    }
+    
+    .users-sidebar {
+      width: 250px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      overflow-y: auto;
+    }
+    
+    .users-title {
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: #0ff;
+      text-shadow: 0 0 5px #00f;
+    }
+    
+    .user-item {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #0066ff, #00ffff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .messages-container {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .message {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      animation: messageAppear 0.3s ease;
+    }
+    
+    .system-message {
+      align-self: center;
+      background: rgba(255, 255, 255, 0.05);
+      color: #aaa;
+      font-style: italic;
+      text-align: center;
+      max-width: 90%;
+    }
+    
+    @keyframes messageAppear {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message.own {
+      align-self: flex-end;
+      background: linear-gradient(90deg, #0066ff, #0099ff);
+      color: white;
+    }
+    
+    .message-sender {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #0ff;
+    }
+    
+    .message.own .message-sender {
+      color: white;
+    }
+    
+    .message-text {
+      margin: 0;
+      word-break: break-word;
+    }
+    
+    .message-time {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 4px;
+      text-align: right;
+    }
+    
+    .chat-input-container {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .chat-form {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .message-input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 24px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    
+    .message-input:focus {
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.5);
+    }
+    
+    .message-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .send-btn {
+      padding: 12px 24px;
+      border-radius: 24px;
+      border: none;
+      background: linear-gradient(90deg, #0066ff, #00ffff);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 102, 255, 0.4);
+    }
+    
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 102, 255, 0.5);
+    }
+    
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.error {
+      background: rgba(255, 71, 87, 0.8);
+    }
+    
+    .notification.success {
+      background: rgba(46, 204, 113, 0.8);
+    }
+    
+    .user-count {
+      display: inline-block;
+      background: rgba(0, 102, 255, 0.3);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    
+    @media (max-width: 768px) {
+      .chat-content {
+        flex-direction: column;
+        height: 80vh;
+      }
+      
+      .users-sidebar {
+        width: 100%;
+        height: 120px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .user-list {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+      }
+      
+      .user-item {
+        flex: 0 0 auto;
+        margin-bottom: 0;
+      }
+      
+      .message {
+        max-width: 85%;
+      }
+      
+      .header-buttons {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .leave-btn, .name-btn {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Пузырьки -->
+  <div class="bubbles">
+    <div class="bubble blue" style="left:10%; width:40px; height:40px; animation-duration:18s; --start:0.3;"></div>
+    <div class="bubble pink" style="left:25%; width:25px; height:25px; animation-duration:22s; animation-delay:3s; --start:0.6;"></div>
+    <div class="bubble purple" style="left:40%; width:60px; height:60px; animation-duration:25s; animation-delay:6s; --start:0.1;"></div>
+    <div class="bubble blue" style="left:55%; width:20px; height:20px; animation-duration:20s; animation-delay:2s; --start:0.5;"></div>
+    <div class="bubble pink" style="left:70%; width:50px; height:50px; animation-duration:30s; animation-delay:4s; --start:0.2;"></div>
+    <div class="bubble purple" style="left:85%; width:35px; height:35px; animation-duration:26s; animation-delay:8s; --start:0.7;"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <a href="index.html">
+        <img src="photos/logo-infis.png" alt="infis logo" class="header-logo"/>
+      </a>
+      <ul>
+        <li><a href="general-chat.html">Zpátky k chatům</a></li>
+        <li><a href="index.html">Hlavní stánka</a></li>
+      </ul>
+    </header>
+
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="chat-title">
+          <img src="photos/cz.webp" alt="cesky vlajka" class="chat-flag">
+          <span>Český chat</span>
+          <span class="user-count" id="user-count">0</span>
+        </div>
+        <div class="header-buttons">
+          <button class="name-btn" id="name-btn">Změnit jméno</button>
+          <button class="leave-btn" id="leave-btn">Opustit chat</button>
+        </div>
+      </div>
+      
+      <div class="chat-content">
+        <div class="users-sidebar">
+          <h3 class="users-title">Uživatele</h3>
+          <div class="user-list" id="user-list">
+            <!-- Список пользователей будет здесь -->
+          </div>
+        </div>
+        
+        <div class="chat-main">
+          <div class="messages-container" id="messages">
+            <!-- Сообщения будут здесь -->
+          </div>
+          
+          <div class="chat-input-container">
+            <form class="chat-form" id="chat-form">
+              <input type="text" class="message-input" id="message-input" placeholder="Napište zprávu..." autocomplete="off">
+              <button type="submit" class="send-btn" id="send-btn">Poslat zprávu</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notification" id="notification"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Подключение к серверу
+      const socket = io();
+      
+      // Элементы DOM
+      const messagesContainer = document.getElementById('messages');
+      const messageInput = document.getElementById('message-input');
+      const chatForm = document.getElementById('chat-form');
+      const sendBtn = document.getElementById('send-btn');
+      const leaveBtn = document.getElementById('leave-btn');
+      const nameBtn = document.getElementById('name-btn');
+      const userList = document.getElementById('user-list');
+      const userCount = document.getElementById('user-count');
+      const notification = document.getElementById('notification');
+      
+      // Переменные состояния
+      let currentUser = '';
+      const room = 'czech'; // Изменили комнату на русскую
+      let isConnected = false;
+      
+      // Функция показа уведомления
+      function showNotification(text, type = 'info') {
+        notification.textContent = text;
+        notification.className = `notification show ${type}`;
+        
+        setTimeout(() => {
+          notification.classList.remove('show');
+        }, 3000);
+      }
+      
+      // Запрос имени пользователя
+      function getUserName() {
+        let name = localStorage.getItem('chat_username');
+        
+        if (!name) {
+          name = prompt('Zadejte vaše jméno nebo nickname:') || `Гость${Math.floor(Math.random() * 1000)}`;
+          if (name) {
+            localStorage.setItem('chat_username', name);
+          }
+        }
+        
+        return name;
+      }
+      
+      // Изменение имени пользователя
+      function changeUserName() {
+        const newName = prompt('Zadejte nové jméno:', currentUser);
+        
+        if (newName && newName.trim() && newName !== currentUser) {
+          if (isConnected) {
+            socket.emit('changeUsername', {
+              oldUsername: currentUser,
+              newUsername: newName.trim()
+            });
+          }
+          
+          currentUser = newName.trim();
+          localStorage.setItem('chat_username', currentUser);
+          showNotification(`Jméno jměněno na: ${currentUser}`, 'success');
+        }
+      }
+      
+      // Подключение к чату
+      function connectToChat() {
+        currentUser = getUserName();
+        
+        if (!currentUser) {
+          showNotification('Jméno uživatele je nutno zadat', 'error');
+          return false;
+        }
+        
+        socket.emit('joinChat', room, currentUser);
+        isConnected = true;
+        showNotification(`Jste připojení do chatu jako ${currentUser}`, 'success');
+        return true;
+      }
+      
+      // Форматирование времени
+      function formatTime(date) {
+        return new Date(date).toLocaleTimeString('ru-RU', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+      
+      // Добавление сообщения в чат
+      function addMessage(messageData) {
+        const messageEl = document.createElement('div');
+        messageEl.className = `message ${messageData.username === currentUser ? 'own' : ''}`;
+        
+        messageEl.innerHTML = `
+          <div class="message-sender">${messageData.username}</div>
+          <p class="message-text">${messageData.message}</p>
+          <div class="message-time">${formatTime(messageData.timestamp || new Date())}</div>
+        `;
+        
+        messagesContainer.appendChild(messageEl);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+      
+      // Добавление системного сообщения
+      function addSystemMessage(text) {
+        const messageEl = document.createElement('div');
+        messageEl.className = 'message system-message';
+        messageEl.textContent = text;
+        messagesContainer.appendChild(messageEl);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+      
+      // Обновление списка пользователей
+      function updateUsersList(users) {
+        userList.innerHTML = '';
+        userCount.textContent = users.length;
+        
+        if (users.length === 0) {
+          userList.innerHTML = '<div class="user-item">Žádne uživatele</div>';
+          return;
+        }
+        
+        users.forEach(user => {
+          const userEl = document.createElement('div');
+          userEl.className = 'user-item';
+          
+          userEl.innerHTML = `
+            <div class="user-avatar">${user.charAt(0).toUpperCase()}</div>
+            <span>${user}</span>
+          `;
+          
+          userList.appendChild(userEl);
+        });
+      }
+      
+      // Обработчик отправки сообщения
+      chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const message = messageInput.value.trim();
+        if (!message) return;
+        
+        socket.emit('sendMessage', {
+          chat: room,
+          username: currentUser,
+          message: message
+        });
+        
+        messageInput.value = '';
+      });
+      
+      // Обработчик выхода из чата
+      leaveBtn.addEventListener('click', function() {
+        if (isConnected) {
+          socket.emit('leaveChat');
+          isConnected = false;
+        }
+        
+        window.location.href = 'general-chat.html';
+      });
+      
+      // Обработчик изменения имени
+      nameBtn.addEventListener('click', changeUserName);
+      
+      // Обработчики событий Socket.io
+      socket.on('connect', function() {
+        showNotification('Připojeno k serveru');
+        if (!connectToChat()) {
+          // Если не удалось подключиться, попробуем снова через секунду
+          setTimeout(() => connectToChat(), 1000);
+        }
+      });
+      
+      socket.on('disconnect', function() {
+        showNotification('Odpojeno od servera', 'error');
+        isConnected = false;
+        addSystemMessage('Zkuste reload.');
+      });
+      
+      socket.on('connect_error', function(error) {
+        showNotification('Chyba připojení: ' + error.message, 'error');
+      });
+      
+      socket.on('loadMessages', function(messages) {
+        messagesContainer.innerHTML = '';
+        
+        if (messages.length === 0) {
+          addSystemMessage('Zatim nikdo nenapsal žádnou zprávu. Buďte první!');
+          return;
+        }
+        
+        messages.forEach(message => {
+          addMessage(message);
+        });
+      });
+      
+      socket.on('newMessage', function(message) {
+        addMessage(message);
+      });
+      
+      socket.on('userJoined', function(username) {
+        addSystemMessage(`${username} připojil se do chatu`);
+      });
+      
+      socket.on('userLeft', function(username) {
+        addSystemMessage(`${username} odešel z chatu`);
+      });
+      
+      socket.on('usernameChanged', function(data) {
+        addSystemMessage(`Uživatel ${data.oldUsername} přejmenoval se na ${data.newUsername}`);
+      });
+      
+      socket.on('updateUsers', function(users) {
+        updateUsersList(users);
+      });
+      
+      // Фокус на поле ввода при загрузке
+      messageInput.focus();
+      
+      // Обработка нажатия Ctrl+Enter для отправки сообщения
+      messageInput.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+          chatForm.dispatchEvent(new Event('submit'));
+        }
+      });
+    });
+  </script>
+</body>
+</html>

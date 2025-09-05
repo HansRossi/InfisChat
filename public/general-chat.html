@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Общие чаты | INFIS Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Пузырьки -->
+  <div class="bubbles">
+    <div class="bubble blue" style="left:10%; width:40px; height:40px; animation-duration:18s; --start:0.3;"></div>
+    <div class="bubble pink" style="left:25%; width:25px; height:25px; animation-duration:22s; animation-delay:3s; --start:0.6;"></div>
+    <div class="bubble purple" style="left:40%; width:60px; height:60px; animation-duration:25s; animation-delay:6s; --start:0.1;"></div>
+    <div class="bubble blue" style="left:55%; width:20px; height:20px; animation-duration:20s; animation-delay:2s; --start:0.5;"></div>
+    <div class="bubble pink" style="left:70%; width:50px; height:50px; animation-duration:30s; animation-delay:4s; --start:0.2;"></div>
+    <div class="bubble purple" style="left:85%; width:35px; height:35px; animation-duration:26s; animation-delay:8s; --start:0.7;"></div>
+  </div>
+  <div class="container">
+    <header>
+      <a href="index.html">
+        <img src="photos/logo-infis.png" alt="infis logo" class="header-logo" />
+      </a>
+      <ul>
+        <li><a href="index.html">Главная</a></li>
+        <li><a href="chat.html" class="login">Войти в чат</a></li>
+      </ul>
+    </header>
+
+    <main class="chat-list">
+      <h1>Общие чаты</h1>
+      <div class="cards">
+        <div class="chat-card">
+          <img src="photos/cz.webp" alt="cz flag" class="flag" />
+          <h3>Чешский</h3>
+          <a href="chat-czech.html" class="btn">Войти</a>
+        </div>
+
+        <div class="chat-card">
+          <img src="photos/ru.webp" alt="ru flag" class="flag" />
+          <h3>Русский</h3>
+          <a href="chat-russian.html" class="btn">Войти</a>
+        </div>
+
+        <div class="chat-card">
+          <img src="photos/ua.svg" alt="ua flag" class="flag" />
+          <h3>Украинский</h3>
+          <a href="chat-ukrainian.html" class="btn">Войти</a>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
